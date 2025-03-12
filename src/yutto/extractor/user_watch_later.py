@@ -12,6 +12,7 @@ from yutto.utils.asynclib import CoroutineWrapper
 from yutto.utils.console.logger import Badge, Logger
 from yutto.utils.fetcher import Fetcher, FetcherContext
 from yutto.utils.filter import Filter
+from yutto.mux import 检查视频是否下载过, 单个收藏夹最大允许重复次数
 
 if TYPE_CHECKING:
     import argparse
@@ -44,7 +45,7 @@ class UserWatchLaterExtractor(BatchExtractor):
         except NotLoginError as e:
             Logger.error(e.message)
             return []
-
+        repeat = 0
         for avid in avid_list:
             try:
                 ugc_video_list = await get_ugc_video_list(ctx, client, avid)
@@ -52,6 +53,17 @@ class UserWatchLaterExtractor(BatchExtractor):
                     Logger.debug(f"因为发布时间为 {ugc_video_list['pubdate']}，跳过 {ugc_video_list['title']}")
                     continue
                 await Fetcher.touch_url(ctx, client, avid.to_url())
+
+                if 检查视频是否下载过(str(avid)):
+                    Logger.info(f"已存在 {avid}，跳过")
+                    repeat += 1
+                    if repeat >= 单个收藏夹最大允许重复次数:
+                        Logger.info(f"重复次数达到 {单个收藏夹最大允许重复次数}，跳过剩余视频")
+                        break
+                    continue
+                else:
+                    repeat = max(repeat - 1, 0)
+
                 for ugc_video_item in ugc_video_list["pages"]:
                     ugc_video_info_list.append(
                         (
