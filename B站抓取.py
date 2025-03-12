@@ -4,22 +4,21 @@ from yutto.mux import 获取所有下载索引
 from loguru import logger
 from pathlib import Path
 
-# sessdata 从 ~/.sessdata 文件中读取
-sessdata = Path("/Users/transmux/.sessdata").read_text()
-
-命令行参数 = [
-    "-b",
-    "--proxy no",
-    "--login-strict",
-    "--with-metadata",
-    "-d",
-    "/Users/transmux/Projects/Backup/Bili收藏视频/",
-    "-c",
-    sessdata,
-]
-
-
 def 执行抓取():
+    # sessdata 从 ~/.sessdata 文件中读取
+    sessdata = Path("/Users/transmux/.sessdata").read_text()
+
+    命令行参数 = [
+        "-b",
+        "--proxy no",
+        "--login-strict",
+        "--with-metadata",
+        "-d",
+        "/Users/transmux/Projects/Backup/Bili收藏视频/",
+        "-c",
+        sessdata,
+    ]
+
     下载索引 = 获取所有下载索引()["list"]
     下载索引 = [item["链接"] for item in 下载索引]
 
